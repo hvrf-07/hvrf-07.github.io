@@ -1,10 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Website Saya</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya</title>
+    <style>
+        /* PENGATURAN DASAR (CSS) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* HEADER / BAGIAN ATAS */
+        header {
+            background-color: #2c3e50; /* Warna biru gelap profesional */
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* CONTAINER UTAMA */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* KARTU / SECTION */
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        /* LIST PENGALAMAN */
+        ul.timeline {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul.timeline li {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .date {
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* TOMBOL HUBUNGI */
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* RESPONSIF UNTUK HP */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .container { padding: 0 15px; }
+        }
+    </style>
 </head>
 <body>
-    <h1>Halo Dunia!</h1>
-    <p>Ini adalah website pertama saya yang di-host di GitHub.</p>
+
+    <header>
+        <h1>[Nama Lengkap Anda]</h1>
+        <p>Pendidik & Pengembang Kurikulum | Content Creator</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="card">
+            <h2>Tentang Saya</h2>
+            <p>
+                Selamat datang di website pribadi saya. Saya adalah seorang praktisi pendidikan yang berdedikasi dalam pengembangan kurikulum dan inovasi pembelajaran. 
+                Selain mengajar, saya juga memiliki minat mendalam pada teknologi pendidikan dan pembuatan konten digital kreatif.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Pengalaman & Proyek</h2>
+            <ul class="timeline">
+                <li>
+                    <div class="date">Saat Ini</div>
+                    <strong>Wakil Kepala Sekolah Bidang Kurikulum</strong><br>
+                    Mengelola pengembangan kurikulum sekolah, supervisi akademik, dan perencanaan program pembelajaran strategis.
+                </li>
+                <li>
+                    <div class="date">Project</div>
+                    <strong>Program In-House Training (IHT)</strong><br>
+                    Merancang materi pelatihan guru untuk peningkatan kompetensi pedagogik dan profesional.
+                </li>
+                <li>
+                    <div class="date">Karya Digital</div>
+                    <strong>Pengembangan Media Pembelajaran</strong><br>
+                    Membuat modul interaktif, video pembelajaran, dan aset visual berbasis teknologi terkini.
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Materi & Unduhan</h2>
+            <p>Berikut adalah beberapa materi yang bisa diakses:</p>
+            <ul>
+                <li><a href="#">Modul Ajar Kurikulum Merdeka (PDF)</a></li>
+                <li><a href="#">Panduan Asesmen Siswa</a></li>
+                <li><a href="#">Game Edukasi Matematika (Link)</a></li>
+            </ul>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <h2>Hubungi Saya</h2>
+            <p>Tertarik untuk berkolaborasi atau berdiskusi seputar pendidikan?</p>
+            <a href="mailto:emailanda@contoh.com" class="btn">Kirim Email</a>
+        </div>
+
+    </div>
+
+    <footer style="text-align: center; padding: 20px; color: #7f8c8d; font-size: 0.9rem;">
+        &copy; 2026 [Nama Anda]. Dibuat dengan GitHub Pages.
+    </footer>
+
 </body>
 </html>
