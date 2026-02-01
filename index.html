@@ -223,7 +223,7 @@
         const MOVING_CLASSES = ['Biologi 1', 'Biologi 2', 'Biologi 3', 'Biologi 4', 'Biologi 5'];
         const ORIGIN_CLASSES = ['XII A', 'XII B', 'XII C', 'XII D', 'XII E', 'XII F', 'XII G', 'XII H', 'XII I'];
 
-        const GOOGLE_SCRIPT_URL_DEFAULT = "https://script.google.com/macros/s/AKfycbxifiH3Vjr87A21Gp4ktWxqywQrKCUxH85AVX17YqIfEB6pJm9Bva8eRElZu89sa3QZ/exec"; 
+        const GOOGLE_SCRIPT_URL_DEFAULT = "https://script.google.com/macros/s/AKfycbywOd2mVCueRqsigD-jgyaAOLOzm4r1ZWAb1tUnVBv-BobMeikJ7fpOGmfupvk5GDQS/exec"; 
 
         function VirtualFoodLab() {
             // User State
@@ -366,30 +366,33 @@
 
                 setIsSending(true);
 
-                const dataSpreadsheet = finalLog.map(log => ({
+                // --- LOGIKA BARU: HITUNG TOTAL ---
+                const totalCorrect = finalLog.filter(l => l.isCorrect).length;
+                const totalWrong = finalLog.length - totalCorrect;
+                
+                // Format Data: Hanya 1 baris per siswa dengan total skor
+                const summaryData = [{
                     Waktu: new Date().toLocaleString(),
                     Nama: userData.name,
                     Kelas_Biologi: userData.movingClass,
                     Kelas_Asal: userData.originClass,
-                    Nama_Bahan: log.food,
-                    Nama_Reagen: log.reagent,
-                    Kesimpulan_Siswa: log.userConclusion,
-                    Hasil_Analisis: log.isCorrect ? 'TEPAT' : 'TIDAK TEPAT'
-                }));
+                    Total_Benar: totalCorrect,
+                    Total_Salah: totalWrong
+                }];
 
-                console.log("Payload:", JSON.stringify(dataSpreadsheet));
+                console.log("Payload:", JSON.stringify(summaryData));
 
                 try {
                     await fetch(scriptUrl, {
                         method: 'POST',
-                        body: JSON.stringify(dataSpreadsheet),
+                        body: JSON.stringify(summaryData),
                         mode: "no-cors",
                         headers: {
                             "Content-Type": "text/plain"
                         }
                     });
 
-                    alert(`SUKSES!\n\nLaporan praktikum milik ${userData.name} telah berhasil dikirim ke Spreadsheet Guru.\n\nTerima kasih!`);
+                    alert(`SUKSES!\n\nData Ringkasan Praktikum ${userData.name} terkirim.\nBenar: ${totalCorrect}, Salah: ${totalWrong}`);
                 } catch (error) {
                     console.error("Error sending data:", error);
                     alert("Gagal mengirim data. Pastikan koneksi internet lancar dan URL Script benar.");
