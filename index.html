@@ -1,154 +1,708 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Saya</title>
-    <style>
-        /* PENGATURAN DASAR (CSS) */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        /* HEADER / BAGIAN ATAS */
-        header {
-            background-color: #2c3e50; /* Warna biru gelap profesional */
-            color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        header p {
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-
-        /* CONTAINER UTAMA */
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-
-        /* KARTU / SECTION */
-        .card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-
-        /* LIST PENGALAMAN */
-        ul.timeline {
-            list-style-type: none;
-            padding: 0;
-        }
-        ul.timeline li {
-            margin-bottom: 15px;
-            padding-left: 15px;
-            border-left: 4px solid #3498db;
-        }
-        .date {
-            font-weight: bold;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-
-        /* TOMBOL HUBUNGI */
-        .btn {
-            display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background-color: #2980b9;
-        }
-
-        /* RESPONSIF UNTUK HP */
-        @media (max-width: 600px) {
-            header h1 { font-size: 1.8rem; }
-            .container { padding: 0 15px; }
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>[Nama Lengkap Anda]</h1>
-        <p>Pendidik & Pengembang Kurikulum | Content Creator</p>
-    </header>
-
-    <div class="container">
-        
-        <div class="card">
-            <h2>Tentang Saya</h2>
-            <p>
-                Selamat datang di website pribadi saya. Saya adalah seorang praktisi pendidikan yang berdedikasi dalam pengembangan kurikulum dan inovasi pembelajaran. 
-                Selain mengajar, saya juga memiliki minat mendalam pada teknologi pendidikan dan pembuatan konten digital kreatif.
-            </p>
-        </div>
-
-        <div class="card">
-            <h2>Pengalaman & Proyek</h2>
-            <ul class="timeline">
-                <li>
-                    <div class="date">Saat Ini</div>
-                    <strong>Wakil Kepala Sekolah Bidang Kurikulum</strong><br>
-                    Mengelola pengembangan kurikulum sekolah, supervisi akademik, dan perencanaan program pembelajaran strategis.
-                </li>
-                <li>
-                    <div class="date">Project</div>
-                    <strong>Program In-House Training (IHT)</strong><br>
-                    Merancang materi pelatihan guru untuk peningkatan kompetensi pedagogik dan profesional.
-                </li>
-                <li>
-                    <div class="date">Karya Digital</div>
-                    <strong>Pengembangan Media Pembelajaran</strong><br>
-                    Membuat modul interaktif, video pembelajaran, dan aset visual berbasis teknologi terkini.
-                </li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <h2>Materi & Unduhan</h2>
-            <p>Berikut adalah beberapa materi yang bisa diakses:</p>
-            <ul>
-                <li><a href="#">Modul Ajar Kurikulum Merdeka (PDF)</a></li>
-                <li><a href="#">Panduan Asesmen Siswa</a></li>
-                <li><a href="#">Game Edukasi Matematika (Link)</a></li>
-            </ul>
-        </div>
-
-        <div class="card" style="text-align: center;">
-            <h2>Hubungi Saya</h2>
-            <p>Tertarik untuk berkolaborasi atau berdiskusi seputar pendidikan?</p>
-            <a href="mailto:emailanda@contoh.com" class="btn">Kirim Email</a>
-        </div>
-
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Sistem Pencernaan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Rajdhani:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    .font-orbitron { font-family: 'Orbitron', monospace; }
+    .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(244, 114, 182, 0.5), 0 0 40px rgba(168, 85, 247, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(244, 114, 182, 0.8), 0 0 60px rgba(168, 85, 247, 0.5); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    
+    .glow-effect {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .shimmer-text {
+      background: linear-gradient(90deg, #f472b6, #a855f7, #ec4899, #d946ef);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+    }
+    
+    .option-btn {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .option-btn:hover::before {
+      left: 100%;
+    }
+    
+    .correct-answer {
+      background: linear-gradient(135deg, #10b981, #34d399) !important;
+      animation: pulse-glow 0.5s ease-in-out;
+      border-color: #fff !important;
+    }
+    
+    .wrong-answer {
+      background: linear-gradient(135deg, #ef4444, #f87171) !important;
+      border-color: #fff !important;
+    }
+    
+    .prize-item {
+      transition: all 0.3s ease;
+    }
+    
+    .prize-item.current {
+      transform: scale(1.1);
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #1f2937;
+      border: 3px solid white;
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+    }
+    
+    .prize-item.passed {
+      opacity: 0.5;
+    }
+    
+    .leaderboard-row {
+      animation: slideIn 0.3s ease-out forwards;
+      opacity: 0;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .hexagon-bg {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #bfdbfe 50%, #ddd6fe 75%, #fbcfe8 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .fun-pattern {
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(251, 207, 232, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(191, 219, 254, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(253, 230, 138, 0.4) 0%, transparent 50%);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full font-rajdhani">
+  <div id="app" class="h-full w-full overflow-auto hexagon-bg fun-pattern relative"><!-- Decorative elements -->
+   <div class="fixed top-10 left-10 text-6xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 0s;">
+    🍎
+   </div>
+   <div class="fixed top-20 right-20 text-5xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 0.5s;">
+    🥕
+   </div>
+   <div class="fixed bottom-20 left-20 text-6xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 1s;">
+    🍌
+   </div>
+   <div class="fixed bottom-32 right-32 text-5xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 1.5s;">
+    🥗
+   </div>
+   <div class="fixed top-1/2 left-1/4 text-4xl opacity-20 pointer-events-none animate-bounce" style="animation-delay: 2s;">
+    🍊
+   </div>
+   <div class="fixed top-1/3 right-1/4 text-4xl opacity-20 pointer-events-none animate-bounce" style="animation-delay: 2.5s;">
+    🥛
+   </div><!-- Start Screen -->
+   <div id="start-screen" class="min-h-full flex flex-col items-center justify-center p-6">
+    <div class="text-center mb-8 float-animation">
+     <div class="text-6xl mb-4">
+      🧬
+     </div>
+     <h1 id="game-title" class="font-orbitron text-4xl md:text-5xl font-black shimmer-text mb-2">KUIS MILLIONAIRE</h1>
+     <p id="game-subtitle" class="text-xl md:text-2xl text-purple-700 font-bold">Sistem Pencernaan Manusia</p>
     </div>
+    <div class="w-full max-w-md bg-gradient-to-br from-pink-200/95 to-purple-200/95 rounded-2xl p-8 glow-effect shadow-2xl border-4 border-white">
+     <div class="mb-6"><label class="block text-purple-800 text-lg mb-2 font-semibold">Masukkan Nama Anda</label> <input type="text" id="player-name-input" placeholder="Nama Pemain..." class="w-full px-4 py-3 rounded-xl bg-white border-3 border-pink-400 text-gray-800 text-lg focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-200 transition-all">
+     </div><button id="start-btn" onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white font-orbitron font-bold text-xl rounded-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"> 🎮 MULAI BERMAIN </button> <button onclick="showLeaderboard()" class="w-full mt-4 py-3 bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-300 hover:to-cyan-300 text-white font-semibold text-lg rounded-xl transition-all shadow-lg"> 🏆 Lihat Leaderboard </button>
+    </div>
+    <div class="mt-8 text-center text-purple-700 font-semibold text-base max-w-md bg-white/50 rounded-2xl p-4 backdrop-blur-sm">
+     <p>Jawab 15 pertanyaan tentang sistem pencernaan manusia!</p>
+     <p>Semakin tinggi level, semakin besar hadiahnya! 💰</p>
+    </div>
+   </div><!-- Game Screen -->
+   <div id="game-screen" class="min-h-full hidden">
+    <div class="flex flex-col lg:flex-row min-h-full"><!-- Main Game Area -->
+     <div class="flex-1 p-4 lg:p-8 flex flex-col"><!-- Header -->
+      <div class="flex justify-between items-center mb-6 bg-white/80 rounded-2xl p-4 shadow-lg">
+       <div class="flex items-center gap-3"><span class="text-3xl">👤</span> <span id="current-player" class="text-xl text-purple-800 font-semibold"></span>
+       </div>
+       <div class="flex items-center gap-2"><span class="text-2xl">💰</span> <span id="current-prize" class="font-orbitron text-2xl text-pink-600 font-bold">Rp 0</span>
+       </div>
+      </div><!-- Question Card -->
+      <div class="flex-1 flex flex-col justify-center">
+       <div class="bg-gradient-to-br from-cyan-200/95 to-blue-200/95 rounded-2xl p-6 lg:p-8 glow-effect mb-6 shadow-2xl border-4 border-white">
+        <div class="flex items-center justify-between mb-4"><span id="question-level" class="px-4 py-1 bg-blue-500 rounded-full text-sm font-semibold text-white shadow-lg">Level 1</span> <span id="question-difficulty" class="px-4 py-1 bg-green-500 rounded-full text-sm font-semibold text-white shadow-lg">Mudah</span>
+        </div>
+        <p id="question-text" class="text-xl lg:text-2xl text-gray-800 font-bold leading-relaxed"></p>
+       </div><!-- Options -->
+       <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       </div>
+      </div><!-- Game Actions -->
+      <div class="flex justify-center gap-4 mt-6"><button onclick="quitGame()" class="px-6 py-3 bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-300 hover:to-red-300 text-white font-semibold rounded-xl transition-all shadow-lg"> 🚪 Berhenti &amp; Simpan </button>
+      </div>
+     </div><!-- Prize Ladder -->
+     <div class="w-full lg:w-72 bg-gradient-to-b from-purple-200/90 to-pink-200/90 p-4 lg:p-6 border-l-4 border-white">
+      <h3 class="font-orbitron text-lg text-purple-800 mb-4 text-center font-bold">💎 HADIAH</h3>
+      <div id="prize-ladder" class="space-y-2">
+      </div>
+     </div>
+    </div>
+   </div><!-- Result Screen -->
+   <div id="result-screen" class="min-h-full hidden flex flex-col items-center justify-center p-6">
+    <div class="text-center bg-gradient-to-br from-pink-200/95 to-purple-200/95 rounded-3xl p-8 lg:p-12 glow-effect max-w-lg w-full shadow-2xl border-4 border-white">
+     <div id="result-icon" class="text-8xl mb-6">
+      🏆
+     </div>
+     <h2 id="result-title" class="font-orbitron text-3xl lg:text-4xl text-purple-700 font-bold mb-4">SELAMAT!</h2>
+     <p id="result-message" class="text-xl text-gray-800 font-semibold mb-6"></p>
+     <div class="bg-white/80 rounded-2xl p-6 mb-6 shadow-lg">
+      <p class="text-purple-700 mb-2 font-semibold">Total Hadiah Anda</p>
+      <p id="final-prize" class="font-orbitron text-4xl text-pink-600 font-bold"></p>
+      <p class="text-purple-700 mt-2 font-semibold">Level Tercapai: <span id="final-level" class="text-gray-800 font-bold"></span></p>
+     </div>
+     <div class="flex flex-col gap-3"><button onclick="playAgain()" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-indigo-950 font-orbitron font-bold text-xl rounded-xl transition-all"> ��� Main Lagi </button> <button onclick="showLeaderboard()" class="w-full py-3 bg-transparent border-2 border-blue-400 text-blue-300 hover:bg-blue-400/20 font-semibold text-lg rounded-xl transition-all"> 🏆 Lihat Leaderboard </button>
+     </div>
+    </div>
+   </div><!-- Leaderboard Screen -->
+   <div id="leaderboard-screen" class="min-h-full hidden flex flex-col items-center p-6">
+    <div class="w-full max-w-2xl">
+     <div class="text-center mb-8">
+      <h2 class="font-orbitron text-4xl text-purple-700 font-bold mb-2">🏆 LEADERBOARD</h2>
+      <p class="text-gray-700 font-semibold text-lg">Peringkat Pemain Terbaik</p>
+     </div>
+     <div class="bg-gradient-to-br from-pink-200/95 to-purple-200/95 rounded-2xl p-6 glow-effect mb-6 shadow-2xl border-4 border-white">
+      <div class="grid grid-cols-12 gap-2 text-purple-800 font-bold mb-4 pb-2 border-b-2 border-purple-400">
+       <div class="col-span-2 text-center">
+        #
+       </div>
+       <div class="col-span-5">
+        Nama
+       </div>
+       <div class="col-span-3 text-right">
+        Skor
+       </div>
+       <div class="col-span-2 text-center">
+        Level
+       </div>
+      </div>
+      <div id="leaderboard-list" class="space-y-2 max-h-96 overflow-auto">
+       <p class="text-center text-gray-600 py-8 font-semibold">Belum ada data pemain</p>
+      </div>
+     </div><button onclick="backToStart()" class="w-full py-4 bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-300 hover:to-indigo-300 text-white font-orbitron font-bold text-xl rounded-xl transition-all shadow-lg"> ← Kembali ke Menu </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Questions Database
+    const questions = [
+      // Level 1-5: Mudah
+      {
+        level: 1,
+        difficulty: "Mudah",
+        question: "Apa organ pertama dalam sistem pencernaan yang bertugas mengunyah makanan?",
+        options: ["Lambung", "Mulut", "Usus", "Kerongkongan"],
+        correct: 1,
+        prize: 100000
+      },
+      {
+        level: 2,
+        difficulty: "Mudah",
+        question: "Enzim apa yang terdapat dalam air liur untuk mencerna karbohidrat?",
+        options: ["Pepsin", "Lipase", "Amilase", "Tripsin"],
+        correct: 2,
+        prize: 200000
+      },
+      {
+        level: 3,
+        difficulty: "Mudah",
+        question: "Apa nama saluran yang menghubungkan mulut dengan lambung?",
+        options: ["Trakea", "Esofagus", "Duodenum", "Rektum"],
+        correct: 1,
+        prize: 300000
+      },
+      {
+        level: 4,
+        difficulty: "Mudah",
+        question: "Gerakan otot yang mendorong makanan melalui saluran pencernaan disebut?",
+        options: ["Respirasi", "Peristaltik", "Osmosis", "Difusi"],
+        correct: 1,
+        prize: 500000
+      },
+      {
+        level: 5,
+        difficulty: "Mudah",
+        question: "Organ apa yang memproduksi asam klorida (HCl)?",
+        options: ["Usus halus", "Pankreas", "Lambung", "Hati"],
+        correct: 2,
+        prize: 1000000
+      },
+      // Level 6-10: Sedang
+      {
+        level: 6,
+        difficulty: "Sedang",
+        question: "Bagian usus halus mana yang menerima makanan langsung dari lambung?",
+        options: ["Ileum", "Jejunum", "Duodenum", "Sekum"],
+        correct: 2,
+        prize: 2000000
+      },
+      {
+        level: 7,
+        difficulty: "Sedang",
+        question: "Enzim pepsin di lambung berfungsi untuk mencerna?",
+        options: ["Karbohidrat", "Lemak", "Protein", "Vitamin"],
+        correct: 2,
+        prize: 4000000
+      },
+      {
+        level: 8,
+        difficulty: "Sedang",
+        question: "Organ apa yang memproduksi empedu untuk membantu pencernaan lemak?",
+        options: ["Pankreas", "Lambung", "Hati", "Usus besar"],
+        correct: 2,
+        prize: 8000000
+      },
+      {
+        level: 9,
+        difficulty: "Sedang",
+        question: "Vili dan mikrovili pada usus halus berfungsi untuk?",
+        options: ["Menyimpan makanan", "Memperluas permukaan penyerapan", "Menghasilkan enzim", "Membunuh bakteri"],
+        correct: 1,
+        prize: 16000000
+      },
+      {
+        level: 10,
+        difficulty: "Sedang",
+        question: "Kantung empedu berfungsi untuk?",
+        options: ["Memproduksi empedu", "Menyimpan empedu", "Mencerna protein", "Menyerap air"],
+        correct: 1,
+        prize: 32000000
+      },
+      // Level 11-15: Sulit
+      {
+        level: 11,
+        difficulty: "Sulit",
+        question: "Hormon apa yang merangsang pankreas untuk mengeluarkan enzim pencernaan?",
+        options: ["Gastrin", "Sekretin", "Kolesistokinin", "Insulin"],
+        correct: 2,
+        prize: 64000000
+      },
+      {
+        level: 12,
+        difficulty: "Sulit",
+        question: "pH optimal untuk kerja enzim pepsin di lambung adalah?",
+        options: ["7-8", "1-2", "5-6", "9-10"],
+        correct: 1,
+        prize: 125000000
+      },
+      {
+        level: 13,
+        difficulty: "Sulit",
+        question: "Apa nama sfingter yang mengatur pengeluaran isi lambung ke duodenum?",
+        options: ["Sfingter kardiak", "Sfingter pilorus", "Sfingter anal", "Sfingter ileosekal"],
+        correct: 1,
+        prize: 250000000
+      },
+      {
+        level: 14,
+        difficulty: "Sulit",
+        question: "Bakteri Escherichia coli (E. coli) yang menguntungkan di usus besar membantu sintesis vitamin?",
+        options: ["Vitamin A", "Vitamin C", "Vitamin K", "Vitamin D"],
+        correct: 2,
+        prize: 500000000
+      },
+      {
+        level: 15,
+        difficulty: "Sulit",
+        question: "Sel parietal di lambung menghasilkan faktor intrinsik yang penting untuk penyerapan?",
+        options: ["Zat besi", "Kalsium", "Vitamin B12", "Vitamin A"],
+        correct: 2,
+        prize: 1000000000
+      }
+    ];
 
-    <footer style="text-align: center; padding: 20px; color: #7f8c8d; font-size: 0.9rem;">
-        &copy; 2026 [Nama Anda]. Dibuat dengan GitHub Pages.
-    </footer>
+    // Game State
+    let currentLevel = 0;
+    let playerName = '';
+    let currentScore = 0;
+    let leaderboardData = [];
+    let isAnswering = false;
 
-</body>
+    const defaultConfig = {
+      game_title: 'KUIS MILLIONAIRE',
+      subtitle: 'Sistem Pencernaan Manusia',
+      background_color: '#fef3c7',
+      surface_color: '#a7f3d0',
+      text_color: '#1f2937',
+      primary_action_color: '#f472b6',
+      secondary_action_color: '#60a5fa'
+    };
+
+    let config = { ...defaultConfig };
+
+    // Format currency
+    function formatCurrency(num) {
+      return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Render prize ladder
+    function renderPrizeLadder() {
+      const container = document.getElementById('prize-ladder');
+      let html = '';
+      
+      for (let i = questions.length - 1; i >= 0; i--) {
+        const q = questions[i];
+        let className = 'prize-item px-4 py-2 rounded-lg text-center font-semibold';
+        
+        if (i === currentLevel) {
+          className += ' current';
+        } else if (i < currentLevel) {
+          className += ' passed bg-green-300/70 text-green-800';
+        } else {
+          className += ' bg-white/70 text-gray-700';
+        }
+        
+        const isSafezone = i === 4 || i === 9;
+        
+        html += `
+          <div class="${className}" style="animation-delay: ${(questions.length - 1 - i) * 0.05}s">
+            <div class="flex justify-between items-center">
+              <span class="text-sm">${q.level}</span>
+              <span class="text-sm ${isSafezone ? 'text-yellow-400' : ''}">${formatCurrency(q.prize)} ${isSafezone ? '🔒' : ''}</span>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+
+    // Render question
+    function renderQuestion() {
+      const q = questions[currentLevel];
+      
+      document.getElementById('question-level').textContent = `Level ${q.level}`;
+      document.getElementById('question-difficulty').textContent = q.difficulty;
+      document.getElementById('question-difficulty').className = `px-4 py-1 rounded-full text-sm font-semibold text-white shadow-lg ${
+        q.difficulty === 'Mudah' ? 'bg-green-500' : 
+        q.difficulty === 'Sedang' ? 'bg-yellow-500' : 'bg-red-500'
+      }`;
+      document.getElementById('question-text').textContent = q.question;
+      document.getElementById('current-prize').textContent = formatCurrency(currentScore);
+      
+      const optionsHtml = q.options.map((opt, idx) => {
+        const colors = [
+          'from-pink-400 to-rose-400 hover:from-pink-300 hover:to-rose-300',
+          'from-blue-400 to-cyan-400 hover:from-blue-300 hover:to-cyan-300',
+          'from-purple-400 to-violet-400 hover:from-purple-300 hover:to-violet-300',
+          'from-green-400 to-emerald-400 hover:from-green-300 hover:to-emerald-300'
+        ];
+        return `
+        <button 
+          onclick="selectAnswer(${idx})"
+          class="option-btn px-6 py-4 bg-gradient-to-r ${colors[idx]} text-white text-lg font-bold rounded-xl border-3 border-white hover:border-yellow-300 transition-all text-left shadow-lg transform hover:scale-105"
+          data-option="${idx}"
+        >
+          <span class="font-orbitron mr-3 text-yellow-100">${String.fromCharCode(65 + idx)}.</span>
+          ${opt}
+        </button>
+      `}).join('');
+      
+      document.getElementById('options-container').innerHTML = optionsHtml;
+      renderPrizeLadder();
+    }
+
+    // Select answer
+    function selectAnswer(idx) {
+      if (isAnswering) return;
+      isAnswering = true;
+      
+      const q = questions[currentLevel];
+      const buttons = document.querySelectorAll('[data-option]');
+      
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('pointer-events-none');
+      });
+      
+      const selectedBtn = document.querySelector(`[data-option="${idx}"]`);
+      
+      setTimeout(() => {
+        if (idx === q.correct) {
+          selectedBtn.classList.add('correct-answer');
+          currentScore = q.prize;
+          
+          setTimeout(() => {
+            if (currentLevel < questions.length - 1) {
+              currentLevel++;
+              isAnswering = false;
+              renderQuestion();
+            } else {
+              endGame(true);
+            }
+          }, 1500);
+        } else {
+          selectedBtn.classList.add('wrong-answer');
+          const correctBtn = document.querySelector(`[data-option="${q.correct}"]`);
+          correctBtn.classList.add('correct-answer');
+          
+          // Check safezone
+          if (currentLevel >= 10) {
+            currentScore = questions[9].prize;
+          } else if (currentLevel >= 5) {
+            currentScore = questions[4].prize;
+          } else {
+            currentScore = 0;
+          }
+          
+          setTimeout(() => {
+            endGame(false);
+          }, 2000);
+        }
+      }, 500);
+    }
+
+    // Quit game
+    function quitGame() {
+      endGame(true, true);
+    }
+
+    // End game
+    async function endGame(won, quit = false) {
+      const levelReached = currentLevel + 1;
+      
+      // Save score
+      const result = await window.dataSdk.create({
+        player_name: playerName,
+        score: currentScore,
+        level_reached: levelReached,
+        played_at: new Date().toISOString()
+      });
+      
+      if (result.isError) {
+        console.error('Failed to save score');
+      }
+      
+      // Show result screen
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.remove('hidden');
+      
+      const resultIcon = document.getElementById('result-icon');
+      const resultTitle = document.getElementById('result-title');
+      const resultMessage = document.getElementById('result-message');
+      
+      if (won && currentLevel === questions.length - 1) {
+        resultIcon.textContent = '🏆';
+        resultTitle.textContent = 'LUAR BIASA!';
+        resultMessage.textContent = 'Anda berhasil menjawab semua pertanyaan dengan benar!';
+      } else if (quit) {
+        resultIcon.textContent = '💰';
+        resultTitle.textContent = 'SELAMAT!';
+        resultMessage.textContent = 'Anda memilih untuk berhenti dan menyimpan hadiah!';
+      } else {
+        resultIcon.textContent = '😔';
+        resultTitle.textContent = 'SAYANG SEKALI!';
+        resultMessage.textContent = 'Jawaban Anda salah. Tapi jangan menyerah!';
+      }
+      
+      document.getElementById('final-prize').textContent = formatCurrency(currentScore);
+      document.getElementById('final-level').textContent = levelReached;
+    }
+
+    // Start game
+    function startGame() {
+      const nameInput = document.getElementById('player-name-input');
+      playerName = nameInput.value.trim();
+      
+      if (!playerName) {
+        nameInput.classList.add('border-red-500');
+        nameInput.placeholder = 'Nama wajib diisi!';
+        return;
+      }
+      
+      currentLevel = 0;
+      currentScore = 0;
+      isAnswering = false;
+      
+      document.getElementById('current-player').textContent = playerName;
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      
+      renderQuestion();
+    }
+
+    // Play again
+    function playAgain() {
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+      document.getElementById('player-name-input').value = playerName;
+    }
+
+    // Show leaderboard
+    function showLeaderboard() {
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('leaderboard-screen').classList.remove('hidden');
+      
+      renderLeaderboard();
+    }
+
+    // Render leaderboard
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-list');
+      
+      if (leaderboardData.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-600 py-8 font-semibold">Belum ada data pemain</p>';
+        return;
+      }
+      
+      // Sort by score (highest first)
+      const sorted = [...leaderboardData].sort((a, b) => b.score - a.score);
+      
+      let html = '';
+      sorted.forEach((entry, idx) => {
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
+        const bgClass = idx === 0 ? 'bg-yellow-300/60' : idx === 1 ? 'bg-gray-300/60' : idx === 2 ? 'bg-orange-300/60' : 'bg-white/60';
+        
+        html += `
+          <div class="leaderboard-row grid grid-cols-12 gap-2 items-center py-3 px-3 rounded-lg ${bgClass} shadow-md" style="animation-delay: ${idx * 0.1}s">
+            <div class="col-span-2 text-center font-bold text-xl">${medal || (idx + 1)}</div>
+            <div class="col-span-5 truncate text-gray-800 font-bold">${entry.player_name}</div>
+            <div class="col-span-3 text-right text-pink-600 font-bold">${formatCurrency(entry.score)}</div>
+            <div class="col-span-2 text-center text-purple-700 font-bold">${entry.level_reached}</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // Back to start
+    function backToStart() {
+      document.getElementById('leaderboard-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    // Update UI based on config
+    function updateUI() {
+      document.getElementById('game-title').textContent = config.game_title || defaultConfig.game_title;
+      document.getElementById('game-subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+    }
+
+    // Data handler
+    const dataHandler = {
+      onDataChanged(data) {
+        leaderboardData = data;
+        if (!document.getElementById('leaderboard-screen').classList.contains('hidden')) {
+          renderLeaderboard();
+        }
+      }
+    };
+
+    // Element SDK
+    const element = {
+      defaultConfig,
+      async onConfigChange(newConfig) {
+        config = { ...defaultConfig, ...newConfig };
+        updateUI();
+      },
+      mapToCapabilities(cfg) {
+        return {
+          recolorables: [
+            {
+              get: () => cfg.background_color || defaultConfig.background_color,
+              set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+            },
+            {
+              get: () => cfg.surface_color || defaultConfig.surface_color,
+              set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+            },
+            {
+              get: () => cfg.text_color || defaultConfig.text_color,
+              set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+            },
+            {
+              get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
+              set: (v) => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
+            },
+            {
+              get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (v) => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        };
+      },
+      mapToEditPanelValues(cfg) {
+        return new Map([
+          ['game_title', cfg.game_title || defaultConfig.game_title],
+          ['subtitle', cfg.subtitle || defaultConfig.subtitle]
+        ]);
+      }
+    };
+
+    // Initialize
+    async function init() {
+      if (window.elementSdk) {
+        window.elementSdk.init(element);
+      }
+      
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (result.isError) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+      
+      updateUI();
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6668922289b5c0',t:'MTc2OTgzMzE0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
