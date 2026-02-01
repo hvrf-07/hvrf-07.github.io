@@ -1,708 +1,895 @@
-<!doctype html>
-<html lang="id" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kuis Sistem Pencernaan</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Rajdhani:wght@400;500;700&amp;display=swap" rel="stylesheet">
-  <style>
-    body {
-      box-sizing: border-box;
+import React, { useState, useEffect } from 'react';
+import { Beaker, Pipette, Flame, Info, RotateCcw, Droplets, BookOpen, CheckCircle, XCircle, User, Save, ClipboardList, School, Leaf, Dna, Activity, ArrowRight, RefreshCw, ChevronDown, Send, Link } from 'lucide-react';
+
+// --- DATA REFERENSI ---
+
+const REAGENTS = [
+  {
+    id: 'lugol',
+    name: 'Lugol (Iodine)',
+    target: 'Amilum',
+    baseColor: 'bg-amber-600',
+    positiveColor: 'bg-slate-900',
+    negativeColor: 'bg-amber-600',
+    desc: 'Indikator Amilum (Karbohidrat).',
+    requiresHeat: false,
+  },
+  {
+    id: 'biuret',
+    name: 'Biuret',
+    target: 'Protein',
+    baseColor: 'bg-blue-400',
+    positiveColor: 'bg-purple-600',
+    negativeColor: 'bg-blue-400',
+    desc: 'Indikator Protein (Ikatan Peptida).',
+    requiresHeat: false,
+  },
+  {
+    id: 'benedict',
+    name: 'Benedict',
+    target: 'Glukosa',
+    baseColor: 'bg-cyan-500',
+    positiveColor: 'bg-red-600',
+    negativeColor: 'bg-cyan-500',
+    desc: 'Indikator Glukosa (Gula Pereduksi). Butuh pemanasan.',
+    requiresHeat: true,
+  },
+  {
+    id: 'ethanol',
+    name: 'Etanol / Kertas Buram',
+    target: 'Lemak',
+    baseColor: 'bg-white/20 border-2 border-dashed border-slate-300',
+    positiveColor: 'bg-yellow-100/40 backdrop-blur-sm',
+    negativeColor: 'bg-white',
+    desc: 'Indikator Lemak (Transparansi/Emulsi).',
+    requiresHeat: false,
+    isPaperTest: true
+  }
+];
+
+const FOODS = [
+  { 
+    id: 'nasi', 
+    name: 'Larutan Nasi', 
+    icon: '🍚', 
+    contents: { amilum: true, protein: false, glukosa: true, lemak: false },
+    baseColor: 'bg-slate-100'
+  },
+  { 
+    id: 'telur', 
+    name: 'Putih Telur', 
+    icon: '🥚', 
+    contents: { amilum: false, protein: true, glukosa: false, lemak: false },
+    baseColor: 'bg-yellow-50'
+  },
+  { 
+    id: 'susu', 
+    name: 'Susu', 
+    icon: '🥛', 
+    contents: { amilum: false, protein: true, glukosa: true, lemak: true },
+    baseColor: 'bg-white'
+  },
+  { 
+    id: 'minyak', 
+    name: 'Minyak Goreng', 
+    icon: '🌻', 
+    contents: { amilum: false, protein: false, glukosa: false, lemak: true },
+    baseColor: 'bg-yellow-200'
+  },
+  { 
+    id: 'tahu', 
+    name: 'Ekstrak Tahu', 
+    icon: '🧊', 
+    contents: { amilum: false, protein: true, glukosa: false, lemak: false },
+    baseColor: 'bg-stone-100'
+  },
+  { 
+    id: 'jeruk', 
+    name: 'Air Jeruk', 
+    icon: '🍊', 
+    contents: { amilum: false, protein: false, glukosa: true, lemak: false },
+    baseColor: 'bg-orange-100'
+  }
+];
+
+const CONCLUSION_OPTIONS = [
+  { id: 'Amilum', label: 'Mengandung Amilum' },
+  { id: 'Protein', label: 'Mengandung Protein' },
+  { id: 'Glukosa', label: 'Mengandung Glukosa' },
+  { id: 'Lemak', label: 'Mengandung Lemak' },
+  { id: 'Netral', label: 'Netral / Tidak Mengandung Zat Diuji' }
+];
+
+const MOVING_CLASSES = ['Biologi 1', 'Biologi 2', 'Biologi 3', 'Biologi 4', 'Biologi 5'];
+const ORIGIN_CLASSES = ['XII A', 'XII B', 'XII C', 'XII D', 'XII E', 'XII F', 'XII G', 'XII H', 'XII I'];
+
+// --- KONFIGURASI GOOGLE SPREADSHEET ---
+// ANDA HARUS MENGGANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA DARI TAHAP 2
+const GOOGLE_SCRIPT_URL_DEFAULT = "https://script.google.com/macros/s/AKfycbxifiH3Vjr87A21Gp4ktWxqywQrKCUxH85AVX17YqIfEB6pJm9Bva8eRElZu89sa3QZ/exec"; 
+
+export default function VirtualFoodLab() {
+  // User State
+  const [userData, setUserData] = useState({ name: '', movingClass: '', originClass: '', isLoggedIn: false });
+  const [tempName, setTempName] = useState('');
+  const [tempMovingClass, setTempMovingClass] = useState('');
+  const [tempOriginClass, setTempOriginClass] = useState('');
+  
+  // Configuration State (Untuk Input URL Script)
+  const [scriptUrl, setScriptUrl] = useState(GOOGLE_SCRIPT_URL_DEFAULT);
+  const [showConfig, setShowConfig] = useState(false);
+
+  // Lab State
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [selectedReagent, setSelectedReagent] = useState(null);
+  const [isReacting, setIsReacting] = useState(false);
+  
+  // Logic State
+  const [visualResult, setVisualResult] = useState(null); 
+  const [heatApplied, setHeatApplied] = useState(false);
+  const [showConclusionModal, setShowConclusionModal] = useState(false);
+  const [finalLog, setFinalLog] = useState([]); 
+  const [showTheory, setShowTheory] = useState(false);
+  const [completedFoods, setCompletedFoods] = useState([]); 
+  const [isSending, setIsSending] = useState(false);
+
+  // --- HANDLERS ---
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (tempName && tempMovingClass && tempOriginClass) {
+      setUserData({ 
+        name: tempName, 
+        movingClass: tempMovingClass,
+        originClass: tempOriginClass,
+        isLoggedIn: true 
+      });
     }
-    
-    .font-orbitron { font-family: 'Orbitron', monospace; }
-    .font-rajdhani { font-family: 'Rajdhani', sans-serif; }
-    
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 20px rgba(244, 114, 182, 0.5), 0 0 40px rgba(168, 85, 247, 0.3); }
-      50% { box-shadow: 0 0 30px rgba(244, 114, 182, 0.8), 0 0 60px rgba(168, 85, 247, 0.5); }
+  };
+
+  const resetLab = () => {
+    setSelectedFood(null);
+    setSelectedReagent(null);
+    setVisualResult(null);
+    setHeatApplied(false);
+    setShowConclusionModal(false);
+  };
+
+  const resetAll = () => {
+    if(window.confirm("Apakah anda yakin ingin menghapus semua data hasil praktikum dan mulai dari awal?")) {
+        setFinalLog([]);
+        setCompletedFoods([]);
+        resetLab();
     }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes shimmer {
-      0% { background-position: -200% center; }
-      100% { background-position: 200% center; }
-    }
-    
-    .glow-effect {
-      animation: pulse-glow 2s ease-in-out infinite;
-    }
-    
-    .float-animation {
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    .shimmer-text {
-      background: linear-gradient(90deg, #f472b6, #a855f7, #ec4899, #d946ef);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 3s linear infinite;
-    }
-    
-    .option-btn {
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .option-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    .option-btn:hover::before {
-      left: 100%;
-    }
-    
-    .correct-answer {
-      background: linear-gradient(135deg, #10b981, #34d399) !important;
-      animation: pulse-glow 0.5s ease-in-out;
-      border-color: #fff !important;
-    }
-    
-    .wrong-answer {
-      background: linear-gradient(135deg, #ef4444, #f87171) !important;
-      border-color: #fff !important;
-    }
-    
-    .prize-item {
-      transition: all 0.3s ease;
-    }
-    
-    .prize-item.current {
-      transform: scale(1.1);
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      color: #1f2937;
-      border: 3px solid white;
-      box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
-    }
-    
-    .prize-item.passed {
-      opacity: 0.5;
-    }
-    
-    .leaderboard-row {
-      animation: slideIn 0.3s ease-out forwards;
-      opacity: 0;
-    }
-    
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .hexagon-bg {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #bfdbfe 50%, #ddd6fe 75%, #fbcfe8 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-    }
-    
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    
-    .fun-pattern {
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(251, 207, 232, 0.4) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(191, 219, 254, 0.4) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(253, 230, 138, 0.4) 0%, transparent 50%);
-    }
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
- </head>
- <body class="h-full font-rajdhani">
-  <div id="app" class="h-full w-full overflow-auto hexagon-bg fun-pattern relative"><!-- Decorative elements -->
-   <div class="fixed top-10 left-10 text-6xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 0s;">
-    🍎
-   </div>
-   <div class="fixed top-20 right-20 text-5xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 0.5s;">
-    🥕
-   </div>
-   <div class="fixed bottom-20 left-20 text-6xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 1s;">
-    🍌
-   </div>
-   <div class="fixed bottom-32 right-32 text-5xl opacity-30 pointer-events-none animate-bounce" style="animation-delay: 1.5s;">
-    🥗
-   </div>
-   <div class="fixed top-1/2 left-1/4 text-4xl opacity-20 pointer-events-none animate-bounce" style="animation-delay: 2s;">
-    🍊
-   </div>
-   <div class="fixed top-1/3 right-1/4 text-4xl opacity-20 pointer-events-none animate-bounce" style="animation-delay: 2.5s;">
-    🥛
-   </div><!-- Start Screen -->
-   <div id="start-screen" class="min-h-full flex flex-col items-center justify-center p-6">
-    <div class="text-center mb-8 float-animation">
-     <div class="text-6xl mb-4">
-      🧬
-     </div>
-     <h1 id="game-title" class="font-orbitron text-4xl md:text-5xl font-black shimmer-text mb-2">KUIS MILLIONAIRE</h1>
-     <p id="game-subtitle" class="text-xl md:text-2xl text-purple-700 font-bold">Sistem Pencernaan Manusia</p>
-    </div>
-    <div class="w-full max-w-md bg-gradient-to-br from-pink-200/95 to-purple-200/95 rounded-2xl p-8 glow-effect shadow-2xl border-4 border-white">
-     <div class="mb-6"><label class="block text-purple-800 text-lg mb-2 font-semibold">Masukkan Nama Anda</label> <input type="text" id="player-name-input" placeholder="Nama Pemain..." class="w-full px-4 py-3 rounded-xl bg-white border-3 border-pink-400 text-gray-800 text-lg focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-200 transition-all">
-     </div><button id="start-btn" onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white font-orbitron font-bold text-xl rounded-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"> 🎮 MULAI BERMAIN </button> <button onclick="showLeaderboard()" class="w-full mt-4 py-3 bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-300 hover:to-cyan-300 text-white font-semibold text-lg rounded-xl transition-all shadow-lg"> 🏆 Lihat Leaderboard </button>
-    </div>
-    <div class="mt-8 text-center text-purple-700 font-semibold text-base max-w-md bg-white/50 rounded-2xl p-4 backdrop-blur-sm">
-     <p>Jawab 15 pertanyaan tentang sistem pencernaan manusia!</p>
-     <p>Semakin tinggi level, semakin besar hadiahnya! 💰</p>
-    </div>
-   </div><!-- Game Screen -->
-   <div id="game-screen" class="min-h-full hidden">
-    <div class="flex flex-col lg:flex-row min-h-full"><!-- Main Game Area -->
-     <div class="flex-1 p-4 lg:p-8 flex flex-col"><!-- Header -->
-      <div class="flex justify-between items-center mb-6 bg-white/80 rounded-2xl p-4 shadow-lg">
-       <div class="flex items-center gap-3"><span class="text-3xl">👤</span> <span id="current-player" class="text-xl text-purple-800 font-semibold"></span>
-       </div>
-       <div class="flex items-center gap-2"><span class="text-2xl">💰</span> <span id="current-prize" class="font-orbitron text-2xl text-pink-600 font-bold">Rp 0</span>
-       </div>
-      </div><!-- Question Card -->
-      <div class="flex-1 flex flex-col justify-center">
-       <div class="bg-gradient-to-br from-cyan-200/95 to-blue-200/95 rounded-2xl p-6 lg:p-8 glow-effect mb-6 shadow-2xl border-4 border-white">
-        <div class="flex items-center justify-between mb-4"><span id="question-level" class="px-4 py-1 bg-blue-500 rounded-full text-sm font-semibold text-white shadow-lg">Level 1</span> <span id="question-difficulty" class="px-4 py-1 bg-green-500 rounded-full text-sm font-semibold text-white shadow-lg">Mudah</span>
-        </div>
-        <p id="question-text" class="text-xl lg:text-2xl text-gray-800 font-bold leading-relaxed"></p>
-       </div><!-- Options -->
-       <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       </div>
-      </div><!-- Game Actions -->
-      <div class="flex justify-center gap-4 mt-6"><button onclick="quitGame()" class="px-6 py-3 bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-300 hover:to-red-300 text-white font-semibold rounded-xl transition-all shadow-lg"> 🚪 Berhenti &amp; Simpan </button>
-      </div>
-     </div><!-- Prize Ladder -->
-     <div class="w-full lg:w-72 bg-gradient-to-b from-purple-200/90 to-pink-200/90 p-4 lg:p-6 border-l-4 border-white">
-      <h3 class="font-orbitron text-lg text-purple-800 mb-4 text-center font-bold">💎 HADIAH</h3>
-      <div id="prize-ladder" class="space-y-2">
-      </div>
-     </div>
-    </div>
-   </div><!-- Result Screen -->
-   <div id="result-screen" class="min-h-full hidden flex flex-col items-center justify-center p-6">
-    <div class="text-center bg-gradient-to-br from-pink-200/95 to-purple-200/95 rounded-3xl p-8 lg:p-12 glow-effect max-w-lg w-full shadow-2xl border-4 border-white">
-     <div id="result-icon" class="text-8xl mb-6">
-      🏆
-     </div>
-     <h2 id="result-title" class="font-orbitron text-3xl lg:text-4xl text-purple-700 font-bold mb-4">SELAMAT!</h2>
-     <p id="result-message" class="text-xl text-gray-800 font-semibold mb-6"></p>
-     <div class="bg-white/80 rounded-2xl p-6 mb-6 shadow-lg">
-      <p class="text-purple-700 mb-2 font-semibold">Total Hadiah Anda</p>
-      <p id="final-prize" class="font-orbitron text-4xl text-pink-600 font-bold"></p>
-      <p class="text-purple-700 mt-2 font-semibold">Level Tercapai: <span id="final-level" class="text-gray-800 font-bold"></span></p>
-     </div>
-     <div class="flex flex-col gap-3"><button onclick="playAgain()" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-indigo-950 font-orbitron font-bold text-xl rounded-xl transition-all"> ��� Main Lagi </button> <button onclick="showLeaderboard()" class="w-full py-3 bg-transparent border-2 border-blue-400 text-blue-300 hover:bg-blue-400/20 font-semibold text-lg rounded-xl transition-all"> 🏆 Lihat Leaderboard </button>
-     </div>
-    </div>
-   </div><!-- Leaderboard Screen -->
-   <div id="leaderboard-screen" class="min-h-full hidden flex flex-col items-center p-6">
-    <div class="w-full max-w-2xl">
-     <div class="text-center mb-8">
-      <h2 class="font-orbitron text-4xl text-purple-700 font-bold mb-2">🏆 LEADERBOARD</h2>
-      <p class="text-gray-700 font-semibold text-lg">Peringkat Pemain Terbaik</p>
-     </div>
-     <div class="bg-gradient-to-br from-pink-200/95 to-purple-200/95 rounded-2xl p-6 glow-effect mb-6 shadow-2xl border-4 border-white">
-      <div class="grid grid-cols-12 gap-2 text-purple-800 font-bold mb-4 pb-2 border-b-2 border-purple-400">
-       <div class="col-span-2 text-center">
-        #
-       </div>
-       <div class="col-span-5">
-        Nama
-       </div>
-       <div class="col-span-3 text-right">
-        Skor
-       </div>
-       <div class="col-span-2 text-center">
-        Level
-       </div>
-      </div>
-      <div id="leaderboard-list" class="space-y-2 max-h-96 overflow-auto">
-       <p class="text-center text-gray-600 py-8 font-semibold">Belum ada data pemain</p>
-      </div>
-     </div><button onclick="backToStart()" class="w-full py-4 bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-300 hover:to-indigo-300 text-white font-orbitron font-bold text-xl rounded-xl transition-all shadow-lg"> ← Kembali ke Menu </button>
-    </div>
-   </div>
-  </div>
-  <script>
-    // Questions Database
-    const questions = [
-      // Level 1-5: Mudah
-      {
-        level: 1,
-        difficulty: "Mudah",
-        question: "Apa organ pertama dalam sistem pencernaan yang bertugas mengunyah makanan?",
-        options: ["Lambung", "Mulut", "Usus", "Kerongkongan"],
-        correct: 1,
-        prize: 100000
-      },
-      {
-        level: 2,
-        difficulty: "Mudah",
-        question: "Enzim apa yang terdapat dalam air liur untuk mencerna karbohidrat?",
-        options: ["Pepsin", "Lipase", "Amilase", "Tripsin"],
-        correct: 2,
-        prize: 200000
-      },
-      {
-        level: 3,
-        difficulty: "Mudah",
-        question: "Apa nama saluran yang menghubungkan mulut dengan lambung?",
-        options: ["Trakea", "Esofagus", "Duodenum", "Rektum"],
-        correct: 1,
-        prize: 300000
-      },
-      {
-        level: 4,
-        difficulty: "Mudah",
-        question: "Gerakan otot yang mendorong makanan melalui saluran pencernaan disebut?",
-        options: ["Respirasi", "Peristaltik", "Osmosis", "Difusi"],
-        correct: 1,
-        prize: 500000
-      },
-      {
-        level: 5,
-        difficulty: "Mudah",
-        question: "Organ apa yang memproduksi asam klorida (HCl)?",
-        options: ["Usus halus", "Pankreas", "Lambung", "Hati"],
-        correct: 2,
-        prize: 1000000
-      },
-      // Level 6-10: Sedang
-      {
-        level: 6,
-        difficulty: "Sedang",
-        question: "Bagian usus halus mana yang menerima makanan langsung dari lambung?",
-        options: ["Ileum", "Jejunum", "Duodenum", "Sekum"],
-        correct: 2,
-        prize: 2000000
-      },
-      {
-        level: 7,
-        difficulty: "Sedang",
-        question: "Enzim pepsin di lambung berfungsi untuk mencerna?",
-        options: ["Karbohidrat", "Lemak", "Protein", "Vitamin"],
-        correct: 2,
-        prize: 4000000
-      },
-      {
-        level: 8,
-        difficulty: "Sedang",
-        question: "Organ apa yang memproduksi empedu untuk membantu pencernaan lemak?",
-        options: ["Pankreas", "Lambung", "Hati", "Usus besar"],
-        correct: 2,
-        prize: 8000000
-      },
-      {
-        level: 9,
-        difficulty: "Sedang",
-        question: "Vili dan mikrovili pada usus halus berfungsi untuk?",
-        options: ["Menyimpan makanan", "Memperluas permukaan penyerapan", "Menghasilkan enzim", "Membunuh bakteri"],
-        correct: 1,
-        prize: 16000000
-      },
-      {
-        level: 10,
-        difficulty: "Sedang",
-        question: "Kantung empedu berfungsi untuk?",
-        options: ["Memproduksi empedu", "Menyimpan empedu", "Mencerna protein", "Menyerap air"],
-        correct: 1,
-        prize: 32000000
-      },
-      // Level 11-15: Sulit
-      {
-        level: 11,
-        difficulty: "Sulit",
-        question: "Hormon apa yang merangsang pankreas untuk mengeluarkan enzim pencernaan?",
-        options: ["Gastrin", "Sekretin", "Kolesistokinin", "Insulin"],
-        correct: 2,
-        prize: 64000000
-      },
-      {
-        level: 12,
-        difficulty: "Sulit",
-        question: "pH optimal untuk kerja enzim pepsin di lambung adalah?",
-        options: ["7-8", "1-2", "5-6", "9-10"],
-        correct: 1,
-        prize: 125000000
-      },
-      {
-        level: 13,
-        difficulty: "Sulit",
-        question: "Apa nama sfingter yang mengatur pengeluaran isi lambung ke duodenum?",
-        options: ["Sfingter kardiak", "Sfingter pilorus", "Sfingter anal", "Sfingter ileosekal"],
-        correct: 1,
-        prize: 250000000
-      },
-      {
-        level: 14,
-        difficulty: "Sulit",
-        question: "Bakteri Escherichia coli (E. coli) yang menguntungkan di usus besar membantu sintesis vitamin?",
-        options: ["Vitamin A", "Vitamin C", "Vitamin K", "Vitamin D"],
-        correct: 2,
-        prize: 500000000
-      },
-      {
-        level: 15,
-        difficulty: "Sulit",
-        question: "Sel parietal di lambung menghasilkan faktor intrinsik yang penting untuk penyerapan?",
-        options: ["Zat besi", "Kalsium", "Vitamin B12", "Vitamin A"],
-        correct: 2,
-        prize: 1000000000
+  };
+
+  const handleTest = () => {
+    if (!selectedFood || !selectedReagent) return;
+    setIsReacting(true);
+    setTimeout(() => {
+      calculateVisualResult(false);
+      setIsReacting(false);
+    }, 1500);
+  };
+
+  const handleHeat = () => {
+    setHeatApplied(true);
+    setIsReacting(true);
+    setTimeout(() => {
+      calculateVisualResult(true);
+      setIsReacting(false);
+    }, 1500);
+  };
+
+  const calculateVisualResult = (isHeated) => {
+    let colorClass = selectedReagent.negativeColor;
+    let isPositive = false;
+    let pendingHeat = false;
+
+    // Logika Reaksi Biologis
+    if (selectedReagent.id === 'lugol' && selectedFood.contents.amilum) {
+      isPositive = true;
+    } else if (selectedReagent.id === 'biuret' && selectedFood.contents.protein) {
+      isPositive = true;
+    } else if (selectedReagent.id === 'benedict' && selectedFood.contents.glukosa) {
+      if (isHeated) {
+        isPositive = true;
+      } else {
+        pendingHeat = true;
       }
-    ];
+    } else if (selectedReagent.id === 'ethanol' && selectedFood.contents.lemak) {
+      isPositive = true;
+    }
 
-    // Game State
-    let currentLevel = 0;
-    let playerName = '';
-    let currentScore = 0;
-    let leaderboardData = [];
-    let isAnswering = false;
+    if (isPositive) {
+      colorClass = selectedReagent.positiveColor;
+    }
 
-    const defaultConfig = {
-      game_title: 'KUIS MILLIONAIRE',
-      subtitle: 'Sistem Pencernaan Manusia',
-      background_color: '#fef3c7',
-      surface_color: '#a7f3d0',
-      text_color: '#1f2937',
-      primary_action_color: '#f472b6',
-      secondary_action_color: '#60a5fa'
+    setVisualResult({
+      isPositive,
+      colorClass,
+      pendingHeat
+    });
+
+    if (!pendingHeat) {
+      setTimeout(() => setShowConclusionModal(true), 500);
+    }
+  };
+
+  const handleConclusionSubmit = (conclusionId) => {
+    let isCorrectConclusion = false;
+    if (visualResult.isPositive) {
+        if (conclusionId === selectedReagent.target) isCorrectConclusion = true;
+    } else {
+        if (conclusionId === 'Netral') isCorrectConclusion = true;
+    }
+
+    const newLog = {
+      timestamp: new Date().toLocaleTimeString(),
+      food: selectedFood.name,
+      reagent: selectedReagent.name,
+      visualResult: visualResult.isPositive ? 'Berubah Warna (+)' : 'Tidak Berubah (-)',
+      userConclusion: conclusionId,
+      isCorrect: isCorrectConclusion
     };
 
-    let config = { ...defaultConfig };
-
-    // Format currency
-    function formatCurrency(num) {
-      return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    setFinalLog([newLog, ...finalLog]);
+    
+    if (!completedFoods.includes(selectedFood.id)) {
+        setCompletedFoods([...completedFoods, selectedFood.id]);
     }
 
-    // Render prize ladder
-    function renderPrizeLadder() {
-      const container = document.getElementById('prize-ladder');
-      let html = '';
+    setShowConclusionModal(false);
+  };
+
+  // --- FUNGSI KIRIM DATA (REAL FETCH) ---
+  const handleFinishAndSend = async () => {
+    if (!scriptUrl) {
+        alert("Mohon masukkan URL Google Apps Script terlebih dahulu di halaman Login (Ikon Rantai/Link) atau Edit Code.");
+        return;
+    }
+
+    setIsSending(true);
+
+    // 1. Format Data sesuai header spreadsheet
+    const dataSpreadsheet = finalLog.map(log => ({
+        Waktu: new Date().toLocaleString(),
+        Nama: userData.name,
+        Kelas_Biologi: userData.movingClass,
+        Kelas_Asal: userData.originClass,
+        Nama_Bahan: log.food,
+        Nama_Reagen: log.reagent,
+        Kesimpulan_Siswa: log.userConclusion,
+        Hasil_Analisis: log.isCorrect ? 'TEPAT' : 'TIDAK TEPAT'
+    }));
+
+    // 2. Kirim menggunakan Fetch API
+    try {
+        await fetch(scriptUrl, {
+            method: 'POST',
+            body: JSON.stringify(dataSpreadsheet),
+            // Menggunakan no-cors agar tidak diblokir browser saat kirim ke Google Script
+            // Konsekuensinya kita tidak bisa baca respons "Sukses", tapi data tetap masuk.
+            mode: "no-cors", 
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        alert(`SUKSES!\n\nLaporan praktikum milik ${userData.name} telah berhasil dikirim ke Spreadsheet Guru.\n\nTerima kasih!`);
+        // Opsional: Reset form atau logout
+        // window.location.reload();
+
+    } catch (error) {
+        console.error("Error sending data:", error);
+        alert("Gagal mengirim data. Pastikan koneksi internet lancar dan URL Script benar.");
+    } finally {
+        setIsSending(false);
+    }
+  };
+
+  const getColorName = (className) => {
+    if (className.includes('slate-900')) return 'Biru Kehitaman';
+    if (className.includes('purple')) return 'Ungu';
+    if (className.includes('red')) return 'Merah Bata';
+    if (className.includes('yellow-100')) return 'Transparan';
+    return 'Warna Asal';
+  };
+
+  const BackgroundDecoration = () => (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-10">
+        <Dna className="absolute top-10 left-10 text-emerald-800 w-32 h-32 rotate-12" />
+        <Leaf className="absolute bottom-20 right-10 text-teal-800 w-40 h-40 -rotate-12" />
+        <Activity className="absolute top-1/3 right-20 text-indigo-800 w-24 h-24" />
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-yellow-300 rounded-full blur-3xl mix-blend-multiply filter opacity-30 animate-blob"></div>
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-purple-300 rounded-full blur-3xl mix-blend-multiply filter opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-pink-300 rounded-full blur-3xl mix-blend-multiply filter opacity-30 animate-blob animation-delay-4000"></div>
+    </div>
+  );
+
+  // --- RENDER LOGIN SCREEN ---
+  if (!userData.isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-100 via-teal-50 to-indigo-100 flex items-center justify-center p-4 font-sans relative overflow-hidden">
+        <BackgroundDecoration />
+        
+        {/* Tombol Config URL Script */}
+        <div className="absolute top-4 right-4 z-20">
+            <button 
+                onClick={() => setShowConfig(!showConfig)}
+                className="bg-white/50 p-2 rounded-full hover:bg-white text-emerald-700 transition-colors"
+                title="Konfigurasi Spreadsheet"
+            >
+                <Link size={20} />
+            </button>
+        </div>
+
+        {/* Modal Config */}
+        {showConfig && (
+            <div className="absolute inset-0 z-30 bg-black/50 flex items-center justify-center p-4">
+                <div className="bg-white p-6 rounded-xl shadow-2xl max-w-lg w-full">
+                    <h3 className="font-bold text-lg mb-2">Konfigurasi Database</h3>
+                    <p className="text-sm text-slate-500 mb-4">Masukkan URL Web App dari Google Apps Script Deployment anda di sini.</p>
+                    <input 
+                        type="text" 
+                        value={scriptUrl} 
+                        onChange={(e) => setScriptUrl(e.target.value)}
+                        placeholder="https://script.google.com/macros/s/..../exec"
+                        className="w-full p-2 border border-slate-300 rounded mb-4 text-xs font-mono"
+                    />
+                    <div className="flex justify-end gap-2">
+                        <button onClick={() => setShowConfig(false)} className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        <div className="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-md w-full border border-white/50 relative z-10">
+          <div className="flex justify-center mb-6">
+             <div className="relative w-28 h-28 bg-white rounded-full p-2 shadow-lg flex items-center justify-center overflow-hidden">
+                <img 
+                    src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEghKCKGZKfCCKHksaxEq2kC3IlYCt6YNWjOU305T5faT0FpUuQpReGEkJ3wWogNwa9mSEVe7Aav7hSz0Ea9SdNu_PIl2cmvgNQqG9xp9Fmvgegg_wNuO84HE19CX0qmAH3MMahmUtq7Sxw/s320/Logo+SMAN+1+Cipatat+baru.jpg" 
+                    alt="Logo Sekolah" 
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-3xl">🧬</span>';
+                    }}
+                />
+             </div>
+          </div>
+          <h1 className="text-3xl font-extrabold text-center text-emerald-900 mb-2 drop-shadow-sm">Lab Biologi Maya</h1>
+          <p className="text-center text-emerald-600 mb-8 font-medium">Ujian Praktek Biologi<br/>SMA Negeri 1 Cipatat</p>
+          
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-bold text-emerald-800 mb-2">Nama Siswa</label>
+              <input 
+                type="text" 
+                required
+                className="w-full p-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 outline-none transition-all bg-white/80"
+                placeholder="Masukkan nama lengkap..."
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-emerald-800 mb-2">Kelas Biologi</label>
+                <div className="relative">
+                  <select 
+                    required
+                    className="w-full p-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 outline-none transition-all bg-white/80 appearance-none cursor-pointer"
+                    value={tempMovingClass}
+                    onChange={(e) => setTempMovingClass(e.target.value)}
+                  >
+                    <option value="" disabled>Pilih...</option>
+                    {MOVING_CLASSES.map(cls => (
+                      <option key={cls} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-3.5 text-emerald-600 pointer-events-none" size={16} />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-emerald-800 mb-2">Kelas Asal</label>
+                <div className="relative">
+                  <select 
+                    required
+                    className="w-full p-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 outline-none transition-all bg-white/80 appearance-none cursor-pointer"
+                    value={tempOriginClass}
+                    onChange={(e) => setTempOriginClass(e.target.value)}
+                  >
+                    <option value="" disabled>Pilih...</option>
+                    {ORIGIN_CLASSES.map(cls => (
+                      <option key={cls} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-3.5 text-emerald-600 pointer-events-none" size={16} />
+                </div>
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02] mt-6 flex justify-center items-center gap-2"
+            >
+              <User size={20} />
+              Masuk Laboratorium
+            </button>
+          </form>
+          <div className="mt-8 text-center text-xs text-emerald-600/60 font-medium">
+             Dikembangkan oleh Rubs
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- RENDER MAIN LAB ---
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cyan-50 to-indigo-50 font-sans text-slate-800 p-4 md:p-8 relative">
+      <BackgroundDecoration />
       
-      for (let i = questions.length - 1; i >= 0; i--) {
-        const q = questions[i];
-        let className = 'prize-item px-4 py-2 rounded-lg text-center font-semibold';
-        
-        if (i === currentLevel) {
-          className += ' current';
-        } else if (i < currentLevel) {
-          className += ' passed bg-green-300/70 text-green-800';
-        } else {
-          className += ' bg-white/70 text-gray-700';
-        }
-        
-        const isSafezone = i === 4 || i === 9;
-        
-        html += `
-          <div class="${className}" style="animation-delay: ${(questions.length - 1 - i) * 0.05}s">
-            <div class="flex justify-between items-center">
-              <span class="text-sm">${q.level}</span>
-              <span class="text-sm ${isSafezone ? 'text-yellow-400' : ''}">${formatCurrency(q.prize)} ${isSafezone ? '🔒' : ''}</span>
+      {/* Header */}
+      <header className="relative z-20 max-w-6xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/50 gap-4">
+        <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="w-16 h-16 shrink-0 flex items-center justify-center bg-white rounded-xl shadow-md overflow-hidden border border-emerald-100">
+                <img 
+                    src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEghKCKGZKfCCKHksaxEq2kC3IlYCt6YNWjOU305T5faT0FpUuQpReGEkJ3wWogNwa9mSEVe7Aav7hSz0Ea9SdNu_PIl2cmvgNQqG9xp9Fmvgegg_wNuO84HE19CX0qmAH3MMahmUtq7Sxw/s320/Logo+SMAN+1+Cipatat+baru.jpg" 
+                    alt="Logo" 
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-2xl">🧬</span>';
+                    }}
+                />
+            </div>
+          <div>
+            <h1 className="text-xl font-extrabold text-emerald-900 leading-tight tracking-tight">UJIAN PRAKTEK BIOLOGI</h1>
+            <h2 className="text-lg text-teal-600 font-bold">SMA NEGERI 1 CIPATAT</h2>
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 mt-1">
+                <span className="bg-emerald-100 text-emerald-800 px-3 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1"><User size={10}/> {userData.name}</span>
+                <span className="bg-indigo-100 text-indigo-800 px-3 py-0.5 rounded-full border border-indigo-200"><School size={10} className="inline mr-1"/> {userData.originClass}</span>
+                <span className="bg-teal-100 text-teal-800 px-3 py-0.5 rounded-full border border-teal-200"><Activity size={10} className="inline mr-1"/> {userData.movingClass}</span>
             </div>
           </div>
-        `;
-      }
-      
-      container.innerHTML = html;
-    }
+        </div>
+        <div className="flex items-center gap-2">
+            <button 
+            onClick={() => setShowTheory(!showTheory)}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-xl hover:bg-indigo-200 transition-colors text-sm font-bold shadow-sm"
+            >
+            <BookOpen size={18} />
+            Materi
+            </button>
+        </div>
+      </header>
 
-    // Render question
-    function renderQuestion() {
-      const q = questions[currentLevel];
-      
-      document.getElementById('question-level').textContent = `Level ${q.level}`;
-      document.getElementById('question-difficulty').textContent = q.difficulty;
-      document.getElementById('question-difficulty').className = `px-4 py-1 rounded-full text-sm font-semibold text-white shadow-lg ${
-        q.difficulty === 'Mudah' ? 'bg-green-500' : 
-        q.difficulty === 'Sedang' ? 'bg-yellow-500' : 'bg-red-500'
-      }`;
-      document.getElementById('question-text').textContent = q.question;
-      document.getElementById('current-prize').textContent = formatCurrency(currentScore);
-      
-      const optionsHtml = q.options.map((opt, idx) => {
-        const colors = [
-          'from-pink-400 to-rose-400 hover:from-pink-300 hover:to-rose-300',
-          'from-blue-400 to-cyan-400 hover:from-blue-300 hover:to-cyan-300',
-          'from-purple-400 to-violet-400 hover:from-purple-300 hover:to-violet-300',
-          'from-green-400 to-emerald-400 hover:from-green-300 hover:to-emerald-300'
-        ];
-        return `
-        <button 
-          onclick="selectAnswer(${idx})"
-          class="option-btn px-6 py-4 bg-gradient-to-r ${colors[idx]} text-white text-lg font-bold rounded-xl border-3 border-white hover:border-yellow-300 transition-all text-left shadow-lg transform hover:scale-105"
-          data-option="${idx}"
-        >
-          <span class="font-orbitron mr-3 text-yellow-100">${String.fromCharCode(65 + idx)}.</span>
-          ${opt}
-        </button>
-      `}).join('');
-      
-      document.getElementById('options-container').innerHTML = optionsHtml;
-      renderPrizeLadder();
-    }
-
-    // Select answer
-    function selectAnswer(idx) {
-      if (isAnswering) return;
-      isAnswering = true;
-      
-      const q = questions[currentLevel];
-      const buttons = document.querySelectorAll('[data-option]');
-      
-      buttons.forEach(btn => {
-        btn.disabled = true;
-        btn.classList.add('pointer-events-none');
-      });
-      
-      const selectedBtn = document.querySelector(`[data-option="${idx}"]`);
-      
-      setTimeout(() => {
-        if (idx === q.correct) {
-          selectedBtn.classList.add('correct-answer');
-          currentScore = q.prize;
-          
-          setTimeout(() => {
-            if (currentLevel < questions.length - 1) {
-              currentLevel++;
-              isAnswering = false;
-              renderQuestion();
-            } else {
-              endGame(true);
-            }
-          }, 1500);
-        } else {
-          selectedBtn.classList.add('wrong-answer');
-          const correctBtn = document.querySelector(`[data-option="${q.correct}"]`);
-          correctBtn.classList.add('correct-answer');
-          
-          // Check safezone
-          if (currentLevel >= 10) {
-            currentScore = questions[9].prize;
-          } else if (currentLevel >= 5) {
-            currentScore = questions[4].prize;
-          } else {
-            currentScore = 0;
-          }
-          
-          setTimeout(() => {
-            endGame(false);
-          }, 2000);
-        }
-      }, 500);
-    }
-
-    // Quit game
-    function quitGame() {
-      endGame(true, true);
-    }
-
-    // End game
-    async function endGame(won, quit = false) {
-      const levelReached = currentLevel + 1;
-      
-      // Save score
-      const result = await window.dataSdk.create({
-        player_name: playerName,
-        score: currentScore,
-        level_reached: levelReached,
-        played_at: new Date().toISOString()
-      });
-      
-      if (result.isError) {
-        console.error('Failed to save score');
-      }
-      
-      // Show result screen
-      document.getElementById('game-screen').classList.add('hidden');
-      document.getElementById('result-screen').classList.remove('hidden');
-      
-      const resultIcon = document.getElementById('result-icon');
-      const resultTitle = document.getElementById('result-title');
-      const resultMessage = document.getElementById('result-message');
-      
-      if (won && currentLevel === questions.length - 1) {
-        resultIcon.textContent = '🏆';
-        resultTitle.textContent = 'LUAR BIASA!';
-        resultMessage.textContent = 'Anda berhasil menjawab semua pertanyaan dengan benar!';
-      } else if (quit) {
-        resultIcon.textContent = '💰';
-        resultTitle.textContent = 'SELAMAT!';
-        resultMessage.textContent = 'Anda memilih untuk berhenti dan menyimpan hadiah!';
-      } else {
-        resultIcon.textContent = '😔';
-        resultTitle.textContent = 'SAYANG SEKALI!';
-        resultMessage.textContent = 'Jawaban Anda salah. Tapi jangan menyerah!';
-      }
-      
-      document.getElementById('final-prize').textContent = formatCurrency(currentScore);
-      document.getElementById('final-level').textContent = levelReached;
-    }
-
-    // Start game
-    function startGame() {
-      const nameInput = document.getElementById('player-name-input');
-      playerName = nameInput.value.trim();
-      
-      if (!playerName) {
-        nameInput.classList.add('border-red-500');
-        nameInput.placeholder = 'Nama wajib diisi!';
-        return;
-      }
-      
-      currentLevel = 0;
-      currentScore = 0;
-      isAnswering = false;
-      
-      document.getElementById('current-player').textContent = playerName;
-      document.getElementById('start-screen').classList.add('hidden');
-      document.getElementById('game-screen').classList.remove('hidden');
-      
-      renderQuestion();
-    }
-
-    // Play again
-    function playAgain() {
-      document.getElementById('result-screen').classList.add('hidden');
-      document.getElementById('start-screen').classList.remove('hidden');
-      document.getElementById('player-name-input').value = playerName;
-    }
-
-    // Show leaderboard
-    function showLeaderboard() {
-      document.getElementById('start-screen').classList.add('hidden');
-      document.getElementById('game-screen').classList.add('hidden');
-      document.getElementById('result-screen').classList.add('hidden');
-      document.getElementById('leaderboard-screen').classList.remove('hidden');
-      
-      renderLeaderboard();
-    }
-
-    // Render leaderboard
-    function renderLeaderboard() {
-      const container = document.getElementById('leaderboard-list');
-      
-      if (leaderboardData.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-600 py-8 font-semibold">Belum ada data pemain</p>';
-        return;
-      }
-      
-      // Sort by score (highest first)
-      const sorted = [...leaderboardData].sort((a, b) => b.score - a.score);
-      
-      let html = '';
-      sorted.forEach((entry, idx) => {
-        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
-        const bgClass = idx === 0 ? 'bg-yellow-300/60' : idx === 1 ? 'bg-gray-300/60' : idx === 2 ? 'bg-orange-300/60' : 'bg-white/60';
+      {/* Main Grid */}
+      <main className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
         
-        html += `
-          <div class="leaderboard-row grid grid-cols-12 gap-2 items-center py-3 px-3 rounded-lg ${bgClass} shadow-md" style="animation-delay: ${idx * 0.1}s">
-            <div class="col-span-2 text-center font-bold text-xl">${medal || (idx + 1)}</div>
-            <div class="col-span-5 truncate text-gray-800 font-bold">${entry.player_name}</div>
-            <div class="col-span-3 text-right text-pink-600 font-bold">${formatCurrency(entry.score)}</div>
-            <div class="col-span-2 text-center text-purple-700 font-bold">${entry.level_reached}</div>
+        {/* Left Column: Selection */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-lg border border-white/60">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xs font-black uppercase tracking-widest text-emerald-600 flex items-center gap-2">
+                <span className="bg-emerald-200 text-emerald-800 w-6 h-6 flex items-center justify-center rounded-full shadow-sm">1</span> Pilih Sampel
+                </h2>
+                <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    Progress: {completedFoods.length} / {FOODS.length}
+                </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {FOODS.map((food) => {
+                const isCompleted = completedFoods.includes(food.id);
+                const isSelected = selectedFood?.id === food.id;
+                return (
+                    <button
+                    key={food.id}
+                    disabled={visualResult && !completedFoods.includes(food.id)} 
+                    onClick={() => { setSelectedFood(food); setVisualResult(null); setHeatApplied(false); }}
+                    className={`relative p-3 rounded-xl border-2 text-left transition-all transform hover:scale-[1.02] active:scale-95 shadow-sm
+                        ${isSelected 
+                        ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200' 
+                        : isCompleted 
+                            ? 'border-slate-200 bg-slate-50 opacity-70 grayscale'
+                            : 'border-white bg-white hover:border-emerald-300'
+                        }
+                    `}
+                    >
+                    {isCompleted && <div className="absolute top-2 right-2 text-green-600 bg-green-100 rounded-full p-0.5"><CheckCircle size={14}/></div>}
+                    <span className="text-3xl block mb-2">{food.icon}</span>
+                    <span className="font-bold text-sm text-slate-700">{food.name}</span>
+                    </button>
+                );
+              })}
+            </div>
           </div>
-        `;
-      });
-      
-      container.innerHTML = html;
-    }
 
-    // Back to start
-    function backToStart() {
-      document.getElementById('leaderboard-screen').classList.add('hidden');
-      document.getElementById('start-screen').classList.remove('hidden');
-    }
+          <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-lg border border-white/60">
+            <h2 className="text-xs font-black uppercase tracking-widest text-purple-600 mb-4 flex items-center gap-2">
+              <span className="bg-purple-200 text-purple-800 w-6 h-6 flex items-center justify-center rounded-full shadow-sm">2</span> Pilih Reagen
+            </h2>
+            <div className="space-y-2">
+              {REAGENTS.map((reagent) => (
+                <button
+                  key={reagent.id}
+                  disabled={visualResult && !completedFoods.includes(selectedFood?.id)}
+                  onClick={() => { setSelectedReagent(reagent); setVisualResult(null); setHeatApplied(false); }}
+                  className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all transform hover:translate-x-1
+                    ${selectedReagent?.id === reagent.id 
+                      ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200' 
+                      : 'border-white bg-white hover:border-purple-300'
+                    }
+                  `}
+                >
+                  <div className={`w-10 h-10 rounded-full ${reagent.baseColor} border-2 border-white shadow-md flex items-center justify-center text-xs text-white/70 font-bold`}>
+                    {reagent.id === 'ethanol' && 'Eth'}
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-slate-800">{reagent.name}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
-    // Update UI based on config
-    function updateUI() {
-      document.getElementById('game-title').textContent = config.game_title || defaultConfig.game_title;
-      document.getElementById('game-subtitle').textContent = config.subtitle || defaultConfig.subtitle;
-    }
+        {/* Center Column: The Lab Bench */}
+        <div className="lg:col-span-8 space-y-6">
+          
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/50 overflow-hidden min-h-[550px] flex flex-col relative ring-1 ring-slate-900/5">
+            
+            {/* Theory Overlay */}
+            {showTheory && (
+              <div className="absolute inset-0 bg-white/95 z-40 p-8 overflow-y-auto backdrop-blur-md animate-in fade-in slide-in-from-bottom-10">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2"><BookOpen size={24}/> Materi Praktikum</h3>
+                  <button onClick={() => setShowTheory(false)} className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors">
+                    <XCircle />
+                  </button>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 shadow-sm">
+                    <h4 className="font-bold text-amber-800 text-sm mb-1">Lugol (Iodine)</h4>
+                    <p className="text-xs text-amber-700 leading-relaxed">Digunakan untuk uji Amilum. Warna asli cokelat/oranye. Jika positif mengandung amilum, berubah menjadi <b>Biru Kehitaman</b>.</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-xl border border-purple-100 shadow-sm">
+                    <h4 className="font-bold text-purple-800 text-sm mb-1">Biuret</h4>
+                    <p className="text-xs text-purple-700 leading-relaxed">Digunakan untuk uji Protein. Warna asli biru muda. Jika positif mengandung protein (ikatan peptida), berubah menjadi <b>Ungu / Violet</b>.</p>
+                  </div>
+                  <div className="p-4 bg-red-50 rounded-xl border border-red-100 shadow-sm">
+                    <h4 className="font-bold text-red-800 text-sm mb-1">Benedict</h4>
+                    <p className="text-xs text-red-700 leading-relaxed">Digunakan untuk uji Glukosa. Warna asli biru jernih. Setelah ditetesi harus <b>DIPANASKAN</b>. Jika positif, berubah menjadi <b>Merah Bata</b>.</p>
+                  </div>
+                  <div className="p-4 bg-yellow-50 rounded-xl border border-yellow-100 shadow-sm">
+                    <h4 className="font-bold text-yellow-800 text-sm mb-1">Kertas Buram / Etanol</h4>
+                    <p className="text-xs text-yellow-700 leading-relaxed">Digunakan untuk uji Lemak. Jika dioleskan pada kertas buram, kertas menjadi <b>Transparan</b>.</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-    // Data handler
-    const dataHandler = {
-      onDataChanged(data) {
-        leaderboardData = data;
-        if (!document.getElementById('leaderboard-screen').classList.contains('hidden')) {
-          renderLeaderboard();
+            {/* Modal Kesimpulan */}
+            {showConclusionModal && (
+              <div className="absolute inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full border-t-8 border-emerald-500">
+                  <div className="flex justify-center -mt-12 mb-4">
+                     <div className="bg-emerald-500 text-white p-3 rounded-full shadow-lg">
+                        <Activity size={32} />
+                     </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-center text-slate-800 mb-2">Analisis Hasil</h3>
+                  <p className="text-sm text-center text-slate-500 mb-6">
+                    Berdasarkan perubahan warna yang terjadi, apa kandungan zat pada bahan ini?
+                  </p>
+                  
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 mb-6 text-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-1">Hasil Pengamatan</span>
+                    <span className={`text-lg font-bold ${visualResult?.isPositive ? 'text-emerald-600' : 'text-slate-600'}`}>
+                        {visualResult?.isPositive 
+                            ? `Berubah: ${getColorName(visualResult.colorClass)}` 
+                            : 'Tidak Berubah Warna'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {CONCLUSION_OPTIONS.map((opt) => (
+                        <button
+                            key={opt.id}
+                            onClick={() => handleConclusionSubmit(opt.id)}
+                            className="w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all font-semibold text-sm flex justify-between items-center group"
+                        >
+                            {opt.label}
+                            <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1"/>
+                        </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Lab Visualization */}
+            <div className="flex-1 bg-gradient-to-b from-slate-50 to-slate-200 relative flex flex-col items-center justify-end pb-8 overflow-hidden">
+              
+              {/* Background Lab Elements */}
+              <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{backgroundImage: 'radial-gradient(#4b5563 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+              
+              {/* Meja Lab */}
+              <div className="absolute bottom-0 w-full h-[140px] bg-slate-300 border-t-8 border-slate-400 shadow-inner"></div>
+
+              {/* Status Bar */}
+              <div className="absolute top-6 left-6 right-6 flex justify-between z-10">
+                <div className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold border shadow-sm transition-all ${heatApplied ? 'bg-red-100 text-red-600 border-red-200 animate-pulse' : 'bg-white/80 text-slate-500 border-slate-200'}`}>
+                  Suhu: {heatApplied ? '100°C (MENDIDIH)' : '25°C (RUANG)'}
+                </div>
+              </div>
+
+              {/* Apparatus */}
+              <div className="relative z-10 flex flex-col items-center mb-8">
+                {/* Pipet */}
+                {isReacting && !heatApplied && (
+                  <div className="absolute -top-24 animate-bounce z-20">
+                     <Pipette className="text-slate-600 rotate-[-15deg] drop-shadow-xl" size={64} fill="rgba(0,0,0,0.1)" />
+                     <div className={`w-4 h-4 rounded-full mt-1 ml-2 animate-ping ${selectedReagent?.baseColor}`}></div>
+                  </div>
+                )}
+
+                {/* Api Bunsen */}
+                {heatApplied && (
+                  <div className="absolute -bottom-10 z-20 flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700">
+                     <div className="relative">
+                        <Flame className="text-orange-500 animate-[pulse_0.5s_infinite]" size={80} fill="orange" />
+                        <Flame className="text-yellow-300 absolute top-4 left-4 animate-[pulse_0.3s_infinite]" size={48} fill="yellow" />
+                     </div>
+                     <div className="w-24 h-6 bg-slate-800 rounded-full blur-md mt-[-15px] opacity-40"></div>
+                  </div>
+                )}
+
+                {/* Tabung Reaksi */}
+                <div className="w-32 h-48 border-x-4 border-b-8 border-white/40 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-b-[3rem] relative overflow-hidden shadow-2xl ring-1 ring-white/20 transform transition-all duration-700">
+                    {/* Highlight Glass */}
+                    <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/20 to-transparent z-20 pointer-events-none"></div>
+                    <div className="absolute top-2 left-2 w-2 h-full bg-white/30 rounded-full blur-[1px] z-20 pointer-events-none"></div>
+
+                  <div 
+                    className={`absolute bottom-0 w-full transition-all duration-1000 ease-in-out z-10
+                      ${selectedFood ? 'h-[70%]' : 'h-0'}
+                      ${visualResult ? visualResult.colorClass : (selectedFood?.baseColor || 'bg-transparent')}
+                    `}
+                  >
+                    {/* Bubbles */}
+                    {(heatApplied || visualResult?.isPositive) && (
+                      <div className="absolute inset-0 opacity-60">
+                         {Array.from({length: 5}).map((_, i) => (
+                             <div key={i} className="absolute bg-white rounded-full animate-bubble" 
+                                  style={{
+                                      width: Math.random() * 10 + 5 + 'px',
+                                      height: Math.random() * 10 + 5 + 'px',
+                                      left: Math.random() * 100 + '%',
+                                      bottom: '-10px',
+                                      animationDuration: Math.random() * 2 + 1 + 's',
+                                      animationDelay: Math.random() + 's'
+                                  }}>
+                             </div>
+                         ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="mt-6 bg-slate-800 text-white px-4 py-1.5 rounded-lg text-sm font-mono shadow-xl border border-slate-600">
+                  {selectedFood ? selectedFood.name : 'Wadah Kosong'}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Bar */}
+            <div className="bg-white border-t border-slate-200 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+              
+              {/* Message Area */}
+              <div className="flex-1 text-sm">
+                 {/* Logic untuk pesan status */}
+                 {!selectedFood ? (
+                     <div className="flex items-center gap-2 text-slate-500 animate-pulse">
+                         <ArrowRight size={18} /> Silakan pilih <b>Sampel Makanan</b> di kiri.
+                     </div>
+                 ) : !selectedReagent ? (
+                     <div className="flex items-center gap-2 text-slate-500">
+                         <ArrowRight size={18} /> Sekarang pilih <b>Reagen</b> penguji.
+                     </div>
+                 ) : visualResult?.pendingHeat ? (
+                     <div className="flex items-center gap-2 text-red-600 bg-red-50 p-2 rounded-lg border border-red-100 font-bold">
+                         <Flame size={18} className="animate-bounce" /> Reagen ini butuh pemanasan! Klik tombol Panaskan.
+                     </div>
+                 ) : finalLog.length > 0 && finalLog[0].food === selectedFood.name && finalLog[0].reagent === selectedReagent.name ? (
+                     <div className="flex items-center gap-3">
+                         <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100 font-bold">
+                             <Save size={16} /> Data Tersimpan
+                         </div>
+                         <span className="text-slate-400 text-xs">Klik tombol "Lanjut" untuk sampel berikutnya.</span>
+                     </div>
+                 ) : (
+                    <div className="text-slate-600">
+                        Siap diuji. Klik tombol aksi di kanan.
+                    </div>
+                 )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 shrink-0">
+                {/* Tombol Lanjut (muncul setelah simpan) */}
+                {(finalLog.length > 0 && finalLog[0].food === selectedFood?.name && finalLog[0].reagent === selectedReagent?.name) ? (
+                    <button 
+                        onClick={resetLab}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+                    >
+                        Simpan & Lanjut <ArrowRight size={18} />
+                    </button>
+                ) : (
+                    <>
+                        {selectedReagent?.requiresHeat && (
+                        <button
+                            onClick={handleHeat}
+                            disabled={!visualResult?.pendingHeat || isReacting}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-md transition-all
+                            ${!visualResult?.pendingHeat 
+                                ? 'bg-slate-100 text-slate-300 cursor-not-allowed' 
+                                : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg hover:scale-105 animate-pulse'
+                            }`}
+                        >
+                            <Flame size={18} fill="currentColor" />
+                            Panaskan
+                        </button>
+                        )}
+
+                        <button
+                        onClick={handleTest}
+                        disabled={!selectedFood || !selectedReagent || isReacting || visualResult}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                        <Droplets size={18} fill="currentColor" />
+                        Teteskan Reagen
+                        </button>
+                    </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section: Result Log */}
+        <div className="lg:col-span-12 mt-4 animate-in fade-in slide-in-from-bottom-10 delay-100 pb-10">
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-emerald-100 flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-emerald-900 font-bold">
+                        <ClipboardList size={20} />
+                        Laporan Hasil Praktikum
+                    </div>
+                    <div className="flex items-center gap-3">
+                         <div className="flex items-center gap-1 text-xs text-emerald-600 bg-white/50 px-2 py-1 rounded">
+                            <Save size={14} /> Tersimpan Otomatis
+                        </div>
+                        {finalLog.length > 0 && (
+                            <button 
+                                onClick={resetAll}
+                                className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors font-semibold border border-transparent hover:border-red-100"
+                            >
+                                <RefreshCw size={12} /> Reset Semua Data
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50/50 text-slate-500 uppercase text-xs">
+                            <tr>
+                                <th className="px-6 py-4 font-bold tracking-wider">Bahan Makanan</th>
+                                <th className="px-6 py-4 font-bold tracking-wider">Reagen</th>
+                                <th className="px-6 py-4 font-bold tracking-wider">Perubahan Warna</th>
+                                <th className="px-6 py-4 font-bold tracking-wider">Kesimpulan Siswa</th>
+                                <th className="px-6 py-4 font-bold tracking-wider">Status Analisis</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {finalLog.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="px-6 py-12 text-center">
+                                        <div className="flex flex-col items-center justify-center text-slate-400">
+                                            <ClipboardList size={48} className="mb-2 opacity-20" />
+                                            <p className="italic">Belum ada data praktikum yang tersimpan.</p>
+                                            <p className="text-xs mt-1">Lakukan percobaan di atas untuk mengisi tabel ini.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                finalLog.map((log, index) => (
+                                    <tr key={index} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="px-6 py-4 font-bold text-slate-700">{log.food}</td>
+                                        <td className="px-6 py-4">{log.reagent}</td>
+                                        <td className="px-6 py-4 text-slate-600">{log.visualResult}</td>
+                                        <td className="px-6 py-4">
+                                            <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md text-xs font-bold border border-indigo-100">
+                                                {log.userConclusion}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {log.isCorrect ? (
+                                                <span className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs bg-emerald-50 w-fit px-3 py-1 rounded-full border border-emerald-100">
+                                                    <CheckCircle size={14} /> Tepat
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1.5 text-red-500 font-bold text-xs bg-red-50 w-fit px-3 py-1 rounded-full border border-red-100">
+                                                    <XCircle size={14} /> Kurang Tepat
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Tombol Selesai & Kirim - Muncul jika semua sampel sudah diuji */}
+                {completedFoods.length === FOODS.length && (
+                    <div className="bg-green-50 p-6 flex flex-col items-center text-center border-t border-green-100 animate-in slide-in-from-bottom-5">
+                        <h3 className="text-lg font-bold text-green-800 mb-2">🎉 Seluruh Sampel Telah Diuji!</h3>
+                        <p className="text-green-600 text-sm mb-4 max-w-md">
+                            Anda telah menyelesaikan praktikum uji makanan. Silakan kirim laporan hasil praktikum Anda ke sistem.
+                        </p>
+                        <button 
+                            onClick={handleFinishAndSend}
+                            disabled={isSending}
+                            className={`flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-full font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all text-lg ${isSending ? 'opacity-70 cursor-wait' : ''}`}
+                        >
+                            {isSending ? (
+                                <>
+                                    <RefreshCw className="animate-spin" size={24} /> Mengirim...
+                                </>
+                            ) : (
+                                <>
+                                    <Send size={24} /> Selesai & Kirim Laporan
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+
+            </div>
+        </div>
+
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 text-center text-emerald-800/40 text-sm pb-8 font-medium">
+        <p>Laboratorium maya ini dikembangkan oleh Rubs</p>
+      </footer>
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-      }
-    };
-
-    // Element SDK
-    const element = {
-      defaultConfig,
-      async onConfigChange(newConfig) {
-        config = { ...defaultConfig, ...newConfig };
-        updateUI();
-      },
-      mapToCapabilities(cfg) {
-        return {
-          recolorables: [
-            {
-              get: () => cfg.background_color || defaultConfig.background_color,
-              set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
-            },
-            {
-              get: () => cfg.surface_color || defaultConfig.surface_color,
-              set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
-            },
-            {
-              get: () => cfg.text_color || defaultConfig.text_color,
-              set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-            },
-            {
-              get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
-              set: (v) => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
-            },
-            {
-              get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
-              set: (v) => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
-            }
-          ],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        };
-      },
-      mapToEditPanelValues(cfg) {
-        return new Map([
-          ['game_title', cfg.game_title || defaultConfig.game_title],
-          ['subtitle', cfg.subtitle || defaultConfig.subtitle]
-        ]);
-      }
-    };
-
-    // Initialize
-    async function init() {
-      if (window.elementSdk) {
-        window.elementSdk.init(element);
-      }
-      
-      if (window.dataSdk) {
-        const result = await window.dataSdk.init(dataHandler);
-        if (result.isError) {
-          console.error('Failed to initialize Data SDK');
+        @keyframes bubble {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
         }
-      }
-      
-      updateUI();
-    }
-
-    init();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6668922289b5c0',t:'MTc2OTgzMzE0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+    </div>
+  );
+}
